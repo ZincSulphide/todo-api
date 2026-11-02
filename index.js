@@ -8,11 +8,24 @@ const PRIORITIES = ['p1', 'p2', 'p3']
 app.use(express.json());
 
 app.get('/', (req, res) => {
-  res.json({ message: 'server is running' });
+    res.json({ message: 'server is running' });
 });
 
 app.get('/todos', (req, res) => {
-    const rows = db.prepare('SELECT * FROM TODOS').all()
+    let sql = "SELECT * FROM TODOS WHERE 1 = 1"
+    const values = []
+
+    if(req.query.priority !== undefined) {
+        sql += " AND PRIORITY = ?"
+        values.push(req.query.priority)
+    }
+
+    if (req.query.done !== undefined) {
+        sql += " AND DONE = ?"
+        values.push(Number(req.query.done))
+    }
+
+    const rows = db.prepare(sql).all(...values)
     res.json(rows)
 });
 
